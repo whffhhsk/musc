@@ -55,11 +55,11 @@ async def init():
                         f"Can't have two modules with name! '{imported_module.__MODULE__}' Please Change One"
                     )
 
-    LOGGER("YukkiMusic.plugins").info("Successfully Imported All Modules ")
+    LOGGER("YukkiMusic.plugins").info("تم تنزيل الملفات ")
     await userbot.start()
     await Yukki.start()
     await Yukki.decorators()
-    LOGGER("YukkiMusic").info("YukkiMusic Started Successfully")
+    LOGGER("YukkiMusic").info("تم تشغيل السورس ")
     await idle()
 
 
