@@ -1,9 +1,9 @@
 #
-# Copyright (C) 2024 by TheTeamVivek@Github, < https://github.com/TheTeamVivek >.
+# Copyright (C) 2021-present by TeamYukki@Github, < https://github.com/TeamYukki >.
 #
-# This file is part of < https://github.com/TheTeamVivek/YukkiMusic > project,
-# and is released under the MIT License.
-# Please see < https://github.com/TheTeamVivek/YukkiMusic/blob/master/LICENSE >
+# This file is part of < https://github.com/TeamYukki/YukkiMusicBot > project,
+# and is released under the "GNU v3.0 License Agreement".
+# Please see < https://github.com/TeamYukki/YukkiMusicBot/blob/master/LICENSE >
 #
 # All rights reserved.
 #
@@ -12,17 +12,17 @@ from pyrogram import filters
 from pyrogram.types import Message
 
 from config import BANNED_USERS
-from strings import get_command
+from strings.filters import command
 from YukkiMusic import app
 from YukkiMusic.core.call import Yukki
 from YukkiMusic.utils.database import is_music_playing, music_on
 from YukkiMusic.utils.decorators import AdminRightsCheck
 
 # Commands
-RESUME_COMMAND = get_command("RESUME_COMMAND")
+@app.on_message(
+    command(["استمر","استمرار","ابدء"])
+)
 
-
-@app.on_message(filters.command(RESUME_COMMAND) & filters.group & ~BANNED_USERS)
 @AdminRightsCheck
 async def resume_com(cli, message: Message, _, chat_id):
     if not len(message.command) == 1:
