@@ -1,12 +1,12 @@
 #
-# Copyright (C) 2024 by TheTeamVivek@Github, < https://github.com/TheTeamVivek >.
+# Copyright (C) 2024-present by TeamYukki@Github, < https://github.com/TeamYukki >.
 #
-# This file is part of < https://github.com/TheTeamVivek/YukkiMusic > project,
-# and is released under the MIT License.
-# Please see < https://github.com/TheTeamVivek/YukkiMusic/blob/master/LICENSE >
+# This file is part of < https://github.com/TeamYukki/YukkiMusicBot > project,
+# and is released under the "GNU v3.0 License Agreement".
+# Please see < https://github.com/TeamYukki/YukkiMusicBot/blob/master/LICENSE >
 #
 # All rights reserved.
-#
+# s
 
 
 from pyrogram import filters
@@ -14,8 +14,8 @@ from pyrogram.types import InlineKeyboardMarkup, Message
 
 import config
 from config import BANNED_USERS
-from strings import get_command
-from YukkiMusic import YouTube, app, YTB
+from strings.filters import command
+from YukkiMusic import YouTube, app
 from YukkiMusic.core.call import Yukki
 from YukkiMusic.misc import db
 from YukkiMusic.utils.database import get_loop
@@ -25,10 +25,10 @@ from YukkiMusic.utils.stream.autoclear import auto_clean
 from YukkiMusic.utils.thumbnails import gen_thumb
 
 # Commands
-SKIP_COMMAND = get_command("SKIP_COMMAND")
+@app.on_message(
+    command(["تخطي","التالي","سكب"])
+)
 
-
-@app.on_message(filters.command(SKIP_COMMAND) & filters.group & ~BANNED_USERS)
 @AdminRightsCheck
 async def skip(cli, message: Message, _, chat_id):
     if not len(message.command) < 2:
@@ -112,21 +112,21 @@ async def skip(cli, message: Message, _, chat_id):
         try:
             await Yukki.skip_stream(chat_id, link, video=status)
         except Exception:
-            return await message.reply_text(_["call_7"])
+            return await message.reply_text(_["call_9"])
         button = telegram_markup(_, chat_id)
         img = await gen_thumb(videoid)
         run = await message.reply_photo(
             photo=img,
             caption=_["stream_1"].format(
                 user,
-                f"https://t.me/{app.username}?start=info_{videoid}",
+                f"https://t.me/xl444",
             ),
             reply_markup=InlineKeyboardMarkup(button),
         )
         db[chat_id][0]["mystic"] = run
         db[chat_id][0]["markup"] = "tg"
     elif "vid_" in queued:
-        mystic = await message.reply_text(_["call_8"], disable_web_page_preview=True)
+        mystic = await message.reply_text(_["call_10"], disable_web_page_preview=True)
         try:
             file_path, direct = await YouTube.download(
                 videoid,
@@ -135,26 +135,18 @@ async def skip(cli, message: Message, _, chat_id):
                 video=status,
             )
         except:
-            try:
-                file_path, direct = await YTB.download(
-                    videoid,
-                    mystic,
-                    videoid=True,
-                    video=status,
-                )
-            except:
-                return await mystic.edit_text(_["call_7"])
+            return await mystic.edit_text(_["call_9"])
         try:
             await Yukki.skip_stream(chat_id, file_path, video=status)
         except Exception:
-            return await mystic.edit_text(_["call_7"])
+            return await mystic.edit_text(_["call_9"])
         button = stream_markup(_, videoid, chat_id)
         img = await gen_thumb(videoid)
         run = await message.reply_photo(
             photo=img,
             caption=_["stream_1"].format(
                 title[:27],
-                f"https://t.me/{app.username}?start=info_{videoid}",
+                f"https://t.me/xl444",
                 duration_min,
                 user,
             ),
@@ -167,7 +159,7 @@ async def skip(cli, message: Message, _, chat_id):
         try:
             await Yukki.skip_stream(chat_id, videoid, video=status)
         except Exception:
-            return await message.reply_text(_["call_7"])
+            return await message.reply_text(_["call_9"])
         button = telegram_markup(_, chat_id)
         run = await message.reply_photo(
             photo=config.STREAM_IMG_URL,
@@ -180,7 +172,7 @@ async def skip(cli, message: Message, _, chat_id):
         try:
             await Yukki.skip_stream(chat_id, queued, video=status)
         except Exception:
-            return await message.reply_text(_["call_7"])
+            return await message.reply_text(_["call_9"])
         if videoid == "telegram":
             button = telegram_markup(_, chat_id)
             run = await message.reply_photo(
@@ -189,9 +181,7 @@ async def skip(cli, message: Message, _, chat_id):
                     if str(streamtype) == "audio"
                     else config.TELEGRAM_VIDEO_URL
                 ),
-                caption=_["stream_1"].format(
-                    title, config.SUPPORT_GROUP, check[0]["dur"], user
-                ),
+                caption=_["stream_3"].format(title, check[0]["dur"], user),
                 reply_markup=InlineKeyboardMarkup(button),
             )
             db[chat_id][0]["mystic"] = run
@@ -204,9 +194,7 @@ async def skip(cli, message: Message, _, chat_id):
                     if str(streamtype) == "audio"
                     else config.TELEGRAM_VIDEO_URL
                 ),
-                caption=_["stream_1"].format(
-                    title, config.SUPPORT_GROUP, check[0]["dur"], user
-                ),
+                caption=_["stream_3"].format(title, check[0]["dur"], user),
                 reply_markup=InlineKeyboardMarkup(button),
             )
             db[chat_id][0]["mystic"] = run
@@ -218,7 +206,7 @@ async def skip(cli, message: Message, _, chat_id):
                 photo=img,
                 caption=_["stream_1"].format(
                     title[:27],
-                    f"https://t.me/{app.username}?start=info_{videoid}",
+                    f"https://t.me/xl444",
                     duration_min,
                     user,
                 ),
