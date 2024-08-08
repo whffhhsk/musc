@@ -1,113 +1,240 @@
 #
-# Copyright (C) 2024 by TheTeamVivek@Github, < https://github.com/TheTeamVivek >.
+# Copyright (C) 2024-present by TeamYukki@Github, < https://github.com/TeamYukki >.
 #
-# This file is part of < https://github.com/TheTeamVivek/YukkiMusic > project,
-# and is released under the MIT License.
-# Please see < https://github.com/TheTeamVivek/YukkiMusic/blob/master/LICENSE >
+# This file is part of < https://github.com/TeamYukki/YukkiMusicBot > project,
+# and is released under the "GNU v3.0 License Agreement".
+# Please see < https://github.com/TeamYukki/YukkiMusicBot/blob/master/LICENSE >
 #
 # All rights reserved.
 #
 
-from pyrogram import filters
-from pyrogram.types import Message
 
-from config import BANNED_USERS
+import asyncio
+
+from pyrogram import filters
+from pyrogram.enums import ChatMembersFilter
+from pyrogram.errors import FloodWait
+from strings.filters import command
+import config
+from config import adminlist, chatstats, clean, userstats
 from strings import get_command
 from YukkiMusic import app
-from YukkiMusic.misc import SUDOERS
-from YukkiMusic.utils.database import add_gban_user, remove_gban_user
+from YukkiMusic.utils.database import (
+    get_active_chats,
+    get_authuser_names,
+    get_client,
+    get_particular_top,
+    get_served_chats,
+    get_served_users,
+    get_user_top,
+    update_particular_top,
+    update_user_top,
+)
 from YukkiMusic.utils.decorators.language import language
+from YukkiMusic.utils.formatters import alpha_to_int
 
-# Command
-BLOCK_COMMAND = get_command("BLOCK_COMMAND")
-UNBLOCK_COMMAND = get_command("UNBLOCK_COMMAND")
-BLOCKED_COMMAND = get_command("BLOCKED_COMMAND")
+BROADCAST_COMMAND = get_command("BROADCAST_COMMAND")
+IS_BROADCASTING = False
 
 
-@app.on_message(filters.command(BLOCK_COMMAND) & SUDOERS)
+@app.on_message(command("اذاعة") & filters.user(config.OWNER_ID))
 @language
-async def useradd(client, message: Message, _):
-    if not message.reply_to_message:
-        if len(message.command) != 2:
-            return await message.reply_text(_["general_1"])
-        user = message.text.split(None, 1)[1]
-        if "@" in user:
-            user = user.replace("@", "")
-        user = await app.get_users(user)
-        if user.id in BANNED_USERS:
-            return await message.reply_text(_["block_1"].format(user.mention))
-        await add_gban_user(user.id)
-        BANNED_USERS.add(user.id)
-        await message.reply_text(_["block_2"].format(user.mention))
-        return
-    if message.reply_to_message.from_user.id in BANNED_USERS:
-        return await message.reply_text(
-            _["block_1"].format(message.reply_to_message.from_user.mention)
-        )
-    await add_gban_user(message.reply_to_message.from_user.id)
-    BANNED_USERS.add(message.reply_to_message.from_user.id)
-    await message.reply_text(
-        _["block_2"].format(message.reply_to_message.from_user.mention)
-    )
-
-
-@app.on_message(filters.command(UNBLOCK_COMMAND) & SUDOERS)
-@language
-async def userdel(client, message: Message, _):
-    if not message.reply_to_message:
-        if len(message.command) != 2:
-            return await message.reply_text(_["general_1"])
-        user = message.text.split(None, 1)[1]
-        if "@" in user:
-            user = user.replace("@", "")
-        user = await app.get_users(user)
-        if user.id not in BANNED_USERS:
-            return await message.reply_text(_["block_3"])
-        await remove_gban_user(user.id)
-        BANNED_USERS.remove(user.id)
-        await message.reply_text(_["block_4"])
-        return
-    user_id = message.reply_to_message.from_user.id
-    if user_id not in BANNED_USERS:
-        return await message.reply_text(_["block_3"])
-    await remove_gban_user(user_id)
-    BANNED_USERS.remove(user_id)
-    await message.reply_text(_["block_4"])
-
-
-@app.on_message(filters.command(BLOCKED_COMMAND) & SUDOERS)
-@language
-async def sudoers_list(client, message: Message, _):
-    if not BANNED_USERS:
-        return await message.reply_text(_["block_5"])
-    mystic = await message.reply_text(_["block_6"])
-    msg = _["block_7"]
-    count = 0
-    for users in BANNED_USERS:
-        try:
-            user = await app.get_users(users)
-            user = user.first_name if not user.mention else user.mention
-            count += 1
-        except Exception:
-            continue
-        msg += f"{count}➤ {user}\n"
-    if count == 0:
-        return await mystic.edit_text(_["block_5"])
+async def braodcast_message(client, message, _):
+    global IS_BROADCASTING
+    if message.reply_to_message:
+        x = message.reply_to_message.id
+        y = message.chat.id
     else:
-        return await mystic.edit_text(msg)
+        if len(message.command) < 2:
+            return await message.reply_text(_["broad_5"])
+        query = message.text.split(None, 1)[1]
+        if "بالتثبيت" in query:
+            query = query.replace("بالتثبيت", "")
+        if "-nobot" in query:
+            query = query.replace("-nobot", "")
+        if "-pinloud" in query:
+            query = query.replace("-pinloud", "")
+        if "الحساب" in query:
+            query = query.replace("الحساب", "")
+        if "-user" in query:
+            query = query.replace("-user", "")
+        if query == "":
+            return await message.reply_text(_["broad_6"])
+
+    IS_BROADCASTING = True
+
+    # Bot broadcast inside chats
+    if "-nobot" not in message.text:
+        sent = 0
+        pin = 0
+        chats = []
+        schats = await get_served_chats()
+        for chat in schats:
+            chats.append(int(chat["chat_id"]))
+        for i in chats:
+            if i == config.LOG_GROUP_ID:
+                continue
+            try:
+                m = (
+                    await app.forward_messages(i, y, x)
+                    if message.reply_to_message
+                    else await app.send_message(i, text=query)
+                )
+                if "-pin" in message.text:
+                    try:
+                        await m.pin(disable_notification=True)
+                        pin += 1
+                    except Exception:
+                        continue
+                elif "-pinloud" in message.text:
+                    try:
+                        await m.pin(disable_notification=False)
+                        pin += 1
+                    except Exception:
+                        continue
+                sent += 1
+            except FloodWait as e:
+                flood_time = int(e.value)
+                if flood_time > 200:
+                    continue
+                await asyncio.sleep(flood_time)
+            except Exception:
+                continue
+        try:
+            await message.reply_text(_["broad_1"].format(sent, pin))
+        except:
+            pass
+
+    # Bot broadcasting to users
+    if "-user" in message.text:
+        susr = 0
+        served_users = []
+        susers = await get_served_users()
+        for user in susers:
+            served_users.append(int(user["user_id"]))
+        for i in served_users:
+            try:
+                m = (
+                    await app.forward_messages(i, y, x)
+                    if message.reply_to_message
+                    else await app.send_message(i, text=query)
+                )
+                susr += 1
+            except FloodWait as e:
+                flood_time = int(e.value)
+                if flood_time > 200:
+                    continue
+                await asyncio.sleep(flood_time)
+            except Exception:
+                pass
+        try:
+            await message.reply_text(_["broad_7"].format(susr))
+        except:
+            pass
+
+    # Bot broadcasting by assistant
+    if "الحساب" in message.text:
+        aw = await message.reply_text(_["broad_2"])
+        text = _["broad_3"]
+        from YukkiMusic.core.userbot import assistants
+
+        for num in assistants:
+            sent = 0
+            client = await get_client(num)
+            async for dialog in client.get_dialogs():
+                if dialog.chat.id == config.LOG_GROUP_ID:
+                    continue
+                try:
+                    (
+                        await client.forward_messages(dialog.chat.id, y, x)
+                        if message.reply_to_message
+                        else await client.send_message(dialog.chat.id, text=query)
+                    )
+                    sent += 1
+                except FloodWait as e:
+                    flood_time = int(e.value)
+                    if flood_time > 200:
+                        continue
+                    await asyncio.sleep(flood_time)
+                except Exception as e:
+                    print(e)
+                    continue
+            text += _["broad_4"].format(num, sent)
+        try:
+            await aw.edit_text(text)
+        except:
+            pass
+    IS_BROADCASTING = False
 
 
-__MODULE__ = "B-ʟɪsᴛ"
-__HELP__ = """
-<b>✧ /blacklistchat</b> [ᴄʜᴀᴛ ɪᴅ] - Bʟᴀᴄᴋʟɪsᴛ ᴀɴʏ ᴄʜᴀᴛ ғʀᴏᴍ ᴜsɪɴɢ Mᴜsɪᴄ Bᴏᴛ
-<b>✧ /whitelistchat</b> [ᴄʜᴀᴛ ɪᴅ] - Wʜɪᴛᴇʟɪsᴛ ᴀɴʏ ʙʟᴀᴄᴋʟɪsᴛᴇᴅ ᴄʜᴀᴛ ғʀᴏᴍ ᴜsɪɴɢ Mᴜsɪᴄ Bᴏᴛ
-<b>✧ /blacklistedchat</b> - Cʜᴇᴄᴋ ᴀʟʟ ʙʟᴏᴄᴋᴇᴅ ᴄʜᴀᴛs.
+async def auto_clean():
+    while not await asyncio.sleep(10):
+        try:
+            for chat_id in chatstats:
+                for dic in chatstats[chat_id]:
+                    vidid = dic["vidid"]
+                    title = dic["title"]
+                    chatstats[chat_id].pop(0)
+                    spot = await get_particular_top(chat_id, vidid)
+                    if spot:
+                        spot = spot["spot"]
+                        next_spot = spot + 1
+                        new_spot = {"spot": next_spot, "title": title}
+                        await update_particular_top(chat_id, vidid, new_spot)
+                    else:
+                        next_spot = 1
+                        new_spot = {"spot": next_spot, "title": title}
+                        await update_particular_top(chat_id, vidid, new_spot)
+            for user_id in userstats:
+                for dic in userstats[user_id]:
+                    vidid = dic["vidid"]
+                    title = dic["title"]
+                    userstats[user_id].pop(0)
+                    spot = await get_user_top(user_id, vidid)
+                    if spot:
+                        spot = spot["spot"]
+                        next_spot = spot + 1
+                        new_spot = {"spot": next_spot, "title": title}
+                        await update_user_top(user_id, vidid, new_spot)
+                    else:
+                        next_spot = 1
+                        new_spot = {"spot": next_spot, "title": title}
+                        await update_user_top(user_id, vidid, new_spot)
+        except:
+            continue
+        try:
+            for chat_id in clean:
+                if chat_id == config.LOG_GROUP_ID:
+                    continue
+                for x in clean[chat_id]:
+                    if datetime.now() > x["timer_after"]:
+                        try:
+                            await app.delete_messages(chat_id, x["msg_id"])
+                        except FloodWait as e:
+                            await asyncio.sleep(e.value)
+                        except:
+                            continue
+                    else:
+                        continue
+        except:
+            continue
+        try:
+            served_chats = await get_active_chats()
+            for chat_id in served_chats:
+                if chat_id not in adminlist:
+                    adminlist[chat_id] = []
+                    admins = app.get_chat_members(
+                        chat_id, filter=ChatMembersFilter.ADMINISTRATORS
+                    )
+                    async for user in admins:
+                        if user.privileges.can_manage_video_chats:
+                            adminlist[chat_id].append(user.user.id)
+                    authusers = await get_authuser_names(chat_id)
+                    for user in authusers:
+                        user_id = await alpha_to_int(user)
+                        adminlist[chat_id].append(user_id)
+        except:
+            continue
 
-<b>✧ /block</b> [Usᴇʀɴᴀᴍᴇ ᴏʀ Rᴇᴘʟʏ ᴛᴏ ᴀ ᴜsᴇʀ] - Pʀᴇᴠᴇɴᴛs ᴀ ᴜsᴇʀ ғʀᴏᴍ ᴜsɪɴɢ ʙᴏᴛ ᴄᴏᴍᴍᴀɴᴅs.
-<b>✧ /unblock</b> [Usᴇʀɴᴀᴍᴇ ᴏʀ Rᴇᴘʟʏ ᴛᴏ ᴀ ᴜsᴇʀ] - Rᴇᴍᴏᴠᴇ ᴀ ᴜsᴇʀ ғʀᴏᴍ Bᴏᴛ's Bʟᴏᴄᴋᴇᴅ Lɪsᴛ.
-<b>✧ /blockedusers</b> - Cʜᴇᴄᴋ ʙʟᴏᴄᴋᴇᴅ Usᴇʀs Lɪsᴛs
 
-<b>✧ /gban</b> [Usᴇʀɴᴀᴍᴇ ᴏʀ Rᴇᴘʟʏ ᴛᴏ ᴀ ᴜsᴇʀ] - Gʙᴀɴ ᴀ ᴜsᴇʀ ғʀᴏᴍ ʙᴏᴛ's sᴇʀᴠᴇᴅ ᴄʜᴀᴛ ᴀɴᴅ sᴛᴏᴘ ʜɪᴍ ғʀᴏᴍ ᴜsɪɴɢ ʏᴏᴜʀ ʙᴏᴛ.
-<b>✧ /ungban</b> [Usᴇʀɴᴀᴍᴇ ᴏʀ Rᴇᴘʟʏ ᴛᴏ ᴀ ᴜsᴇʀ] - Rᴇᴍᴏᴠᴇ ᴀ ᴜsᴇʀ ғʀᴏᴍ Bᴏᴛ's ɢʙᴀɴɴᴇᴅ Lɪsᴛ ᴀɴᴅ ᴀʟʟᴏᴡ ʜɪᴍ ғᴏʀ ᴜsɪɴɢ ʏᴏᴜʀ ʙᴏᴛ
-<b>✧ /gbannedusers</b> - Cʜᴇᴄᴋ Gʙᴀɴɴᴇᴅ Usᴇʀs Lɪsᴛs
-"""
+asyncio.create_task(auto_clean())
