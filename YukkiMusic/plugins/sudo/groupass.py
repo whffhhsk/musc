@@ -1,67 +1,55 @@
-#
-# Copyright (C) 2024 by TheTeamVivek@Github, < https://github.com/TheTeamVivek >.
-#
-# This file is part of < https://github.com/TheTeamVivek/YukkiMusic > project,
-# and is released under the MIT License.
-# Please see < https://github.com/TheTeamVivek/YukkiMusic/blob/master/LICENSE >
-#
-# All rights reserved.
-#
 from pyrogram import filters
 from pyrogram.types import Message
-
 from YukkiMusic import app
+from strings.filters import command
 from YukkiMusic.core.userbot import assistants
-from YukkiMusic.utils.assistant import (
-    is_avl_assistant as assistant,
-    get_assistant_details,
-)
+from YukkiMusic.utils.assistant import assistant, get_assistant_details
 from YukkiMusic.utils.database import get_assistant, save_assistant, set_assistant
-
-from config import LOG_GROUP_ID, BANNED_USERS
-
-from YukkiMusic.utils.decorators import AdminActual
+from YukkiMusic.utils.filter import admin_filter
 
 
-@app.on_message(filters.command("changeassistant") & ~BANNED_USERS)
-@AdminActual
-async def assis_change(client, message: Message, _):
-    if await assistant() == True:
+@app.on_message(command("مساعد عشوائي") & admin_filter)
+async def assis_change(_, message: Message):
+    avt = await assistant()
+    if avt == True:
         return await message.reply_text(
-            "sᴏʀʀʏ sɪʀ! ɪɴ ʙᴏᴛ sᴇʀᴠᴇʀ ᴏɴʟʏ ᴏɴʀ ᴀssɪsᴛᴀɴᴛ ᴀᴠᴀɪʟᴀʙʟᴇ ᴛʜᴇʀᴇғᴏʀᴇ ʏᴏᴜ ᴄᴀɴᴛ ᴄʜᴀɴɢᴇ ᴀssɪsᴛᴀɴᴛ"
+            "⦗ لايمكنك تغيير حساب المساعد بسبب لم يتم إضافة اكثر من حساب ⦘"
         )
-    usage = f"**ᴅᴇᴛᴇᴄᴛᴇᴅ ᴡʀᴏɴɢ ᴄᴏᴍᴍᴀɴᴅ ᴜsᴀsɢᴇ \n**ᴜsᴀsɢᴇ:**\n/changeassistant - ᴛᴏ ᴄʜᴀɴɢᴇ ʏᴏᴜʀ ᴄᴜʀʀᴇɴᴛ ɢʀᴏᴜᴘ's ᴀssɪsᴛᴀɴᴛ ᴛᴏ ʀᴀɴᴅᴏᴍ ᴀssɪsᴛᴀɴᴛ ɪɴ ʙᴏᴛ sᴇʀᴠᴇʀ"
+    usage = f"- إستخدامك للأمر خطا ."
     if len(message.command) > 2:
         return await message.reply_text(usage)
     a = await get_assistant(message.chat.id)
-    DETAILS = f"ʏᴏᴜʀ ᴄʜᴀᴛ's ᴀssɪsᴛᴀɴᴛ ʜᴀs ʙᴇᴇɴ ᴄʜᴀɴɢᴇᴅ ғʀᴏᴍ [{a.name}](https://t.me/{a.username}) "
-    if not message.chat.id == LOG_GROUP_ID:
-        try:
-            await a.leave_chat(message.chat.id)
-        except:
-            pass
+    DETAILS = f"-› تم تغيير المساعد من [{a.name}](https://t.me/{a.username}) "
+    try:
+        await a.leave_chat(message.chat.id)
+    except:
+        pass
     b = await set_assistant(message.chat.id)
-    DETAILS += f"ᴛᴏ [{b.name}](https://t.me/{b.username})"
+    DETAILS += f"-› الى [{b.name}](https://t.me/{b.username})"
     try:
         await b.join_chat(message.chat.id)
     except:
         pass
-    await message.reply_text(DETAILS, disable_web_page_preview=True)
+    await message.reply_text(DETAILS, disable_web_page_preview=True, protect_content=PK)
 
 
-@app.on_message(filters.command("setassistant") & ~BANNED_USERS)
-@AdminActual
-async def assis_set(client, message: Message, _):
-    if await assistant():
+@app.on_message(command("ضع") & admin_filter)
+async def assis_set(_, message: Message):
+    avt = await assistant()
+    if avt == True:
         return await message.reply_text(
-            "sᴏʀʀʏ sɪʀ! ɪɴ ʙᴏᴛ sᴇʀᴠᴇʀ ᴏɴʟʏ ᴏɴᴇ ᴀssɪsᴛᴀɴᴛ ᴀᴠᴀɪʟᴀʙʟᴇ ᴛʜᴇʀᴇғᴏʀᴇ ʏᴏᴜ ᴄᴀɴ'ᴛ ᴄʜᴀɴɢᴇ ᴀssɪsᴛᴀɴᴛ"
+            "⦗ لايمكنك تغيير حساب المساعد بسبب لم يتم إضافة اكثر من حساب ⦘"
         )
     usage = await get_assistant_details()
     if len(message.command) != 2:
-        return await message.reply_text(usage, disable_web_page_preview=True)
+        return await message.reply_text(
+            usage, disable_web_page_preview=True, protect_content=PK
+        )
     query = message.text.split(None, 1)[1].strip()
     if query not in assistants:
-        return await message.reply_text(usage, disable_web_page_preview=True)
+        return await message.reply_text(
+            usage, disable_web_page_preview=True, protect_content=PK
+        )
     a = await get_assistant(message.chat.id)
     try:
         await a.leave_chat(message.chat.id)
@@ -73,17 +61,18 @@ async def assis_set(client, message: Message, _):
         await b.join_chat(message.chat.id)
     except:
         pass
-    await message.reply_text(
-        "**Yᴏᴜʀ ᴄʜᴀᴛ's ɴᴇᴡ ᴀssɪsᴛᴀɴᴛ ᴅᴇᴛᴀɪʟs:**\nAssɪsᴛᴀɴᴛ Nᴀᴍᴇ :- {b.name}\nUsᴇʀɴᴀᴍᴇ :- @{b.username}\nID:- {b.id}",
-        disable_web_page_preview=True,
-    )
+    DETAILS = f"""  -›  تفاصيل المساعد الجديد :
+                    -› اسم المساعد :- {a.name}
+                    -› يوزر المساعد  :- {a.username}
+                    -› ايدي المساعد :- @{a.id}"""
+    await message.reply_text(DETAILS, disable_web_page_preview=True, protect_content=PK)
 
 
-@app.on_message(filters.command("checkassistant") & filters.group & ~BANNED_USERS)
-@AdminActual
-async def check_ass(client, message: Message, _):
-    a = await get_assistant(message.chat.id)
-    await message.reply_text(
-        "**Yᴏᴜʀ ᴄʜᴀᴛ's ᴀssɪsᴛᴀɴᴛ ᴅᴇᴛᴀɪʟs:**\nAssɪsᴛᴀɴᴛ Nᴀᴍᴇ :- {a.name}\nAssɪsᴛᴀɴᴛ\nUsᴇʀɴᴀᴍᴇ :- @{a.username}\nAssɪsᴛᴀɴᴛ ID:- {a.id}",
-        disable_web_page_preview=True,
-    )
+@app.on_message(command("الحالي") & admin_filter)
+async def check_ass(_, message: Message):
+    assistant = await get_assistant(message.chat.id)
+    DETAILS = f"""-› المساعد الحالي :
+-› اسم المساعد :- {assistant.name}
+-› يوزر المساعد :- {assistant.username}
+-› ايدي المساعد:- @{assistant.id}"""
+    await message.reply_text(DETAILS, disable_web_page_preview=True, protect_content=PK)
