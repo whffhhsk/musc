@@ -51,7 +51,7 @@ def git():
         UPSTREAM_REPO = config.UPSTREAM_REPO
     try:
         repo = Repo()
-        LOGGER(__name__).info(f"Git Client Found [VPS DEPLOYER]")
+        LOGGER(__name__).info(f"- بلا سيرفر تم .")
     except GitCommandError:
         LOGGER(__name__).info(f"Invalid Git Command")
     except InvalidGitRepositoryError:
@@ -80,4 +80,4 @@ def git():
         except GitCommandError:
             repo.git.reset("--hard", "FETCH_HEAD")
         install_req("pip3 install --no-cache-dir -r requirements.txt")
-        LOGGER(__name__).info(f"Fetched Updates from: {REPO_LINK}")
+        LOGGER(__name__).info(f"- تم استخدام السورس بالرابط : {REPO_LINK}")
