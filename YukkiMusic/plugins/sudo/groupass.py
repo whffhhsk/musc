@@ -14,7 +14,7 @@ from config import LOG_GROUP_ID, BANNED_USERS
 from YukkiMusic.utils.decorators import AdminActual
 
 
-@app.on_message(command("مساعد عشوائي") & admin_filter)
+@app.on_message(command("مساعد عشوائي"))
 async def assis_change(_, message: Message):
     avt = await assistant()
     if avt == True:
@@ -39,7 +39,7 @@ async def assis_change(_, message: Message):
     await message.reply_text(DETAILS, disable_web_page_preview=True, protect_content=PK)
 
 
-@app.on_message(command("ضع") & admin_filter)
+@app.on_message(command("ضع"))
 async def assis_set(_, message: Message):
     avt = await assistant()
     if avt == True:
