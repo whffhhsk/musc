@@ -1,12 +1,13 @@
 #
-# Copyright (C) 2024 by TheTeamVivek@Github, < https://github.com/TheTeamVivek >.
+# Copyright (C) 2024-present by TeamYukki@Github, < https://github.com/TeamYukki >.
 #
-# This file is part of < https://github.com/TheTeamVivek/YukkiMusic > project,
-# and is released under the MIT License.
-# Please see < https://github.com/TheTeamVivek/YukkiMusic/blob/master/LICENSE >
+# This file is part of < https://github.com/TeamYukki/YukkiMusicBot > project,
+# and is released under the "GNU v3.0 License Agreement".
+# Please see < https://github.com/TeamYukki/YukkiMusicBot/blob/master/LICENSE >
 #
 # All rights reserved.
 #
+from strings.filters import command
 import asyncio
 import math
 import os
@@ -51,7 +52,7 @@ async def is_heroku():
 
 
 @app.on_message(
-    filters.command(["log", "logs", "get_log", "getlog", "get_logs", "getlogs"])
+    command(["⦗ سجلات التشغيل ⦘", "السجلات", "سجلات", "getlog", "get_logs", "getlogs"])
     & SUDOERS
 )
 @language
@@ -111,7 +112,7 @@ async def varget_(client, message, _):
             return await message.reply_text(f"**{check_var}:** `{str(output)}`")
 
 
-@app.on_message(filters.command(DELVAR_COMMAND) & SUDOERS)
+@app.on_message(command("حذف فار") & SUDOERS)
 @language
 async def vardel_(client, message, _):
     usage = _["heroku_6"]
@@ -139,7 +140,7 @@ async def vardel_(client, message, _):
             os.system(f"kill -9 {os.getpid()} && python3 -m YukkiMusic")
 
 
-@app.on_message(filters.command(SETVAR_COMMAND) & SUDOERS)
+@app.on_message(command("اضف فار") & SUDOERS)
 @language
 async def set_var(client, message, _):
     usage = _["heroku_8"]
@@ -168,7 +169,7 @@ async def set_var(client, message, _):
         os.system(f"kill -9 {os.getpid()} && python3 -m YukkiMusic")
 
 
-@app.on_message(filters.command(USAGE_COMMAND) & SUDOERS)
+@app.on_message(command(["الداينو", "⦗ الداينو ⦘"]) & SUDOERS)
 @language
 async def usage_dynos(client, message, _):
     ### Credits CatUserbot
@@ -215,17 +216,17 @@ async def usage_dynos(client, message, _):
     AppMinutes = math.floor(AppQuotaUsed % 60)
     await asyncio.sleep(1.5)
     text = f"""
-**Dʏɴᴏ Usᴀɢᴇ**
-
-<u>Usᴀɢᴇ:</u>
-Tᴏᴛᴀʟ ᴜsᴇᴅ: `{AppHours}`**ʜ**  `{AppMinutes}`**ᴍ**  [`{AppPercentage}`**%**]
-
-<u>Rᴇᴀᴍɪɴɪɴɢ ǫᴜᴏᴛᴀ:</u>
-Tᴏᴛᴀʟ ʟᴇғᴛ: `{hours}`**ʜ**  `{minutes}`**ᴍ**  [`{percentage}`**%**]"""
+⦗ عزيزي المطور اليك استخدام الداينو  ⦘
+⎯ ⎯ ⎯ ⎯
+-›  الاستخدام : 
+- الأستخدام الكُلي : `{AppHours}`ساعة `{AppMinutes}`**دقيقة**  [`{AppPercentage}`**%**]
+⎯ ⎯ ⎯ ⎯
+-› الاستخدام المتبقي : 
+- المتبقي : `{hours}`**ساعة**  `{minutes}`**دقيقة**  [`{percentage}`**%**]"""
     return await dyno.edit(text)
 
 
-@app.on_message(filters.command(["update", "gitpull", "up"]) & SUDOERS)
+@app.on_message(command(["⦗ تحديث السورس ⦘", "⦗ تحديث السورس ⦘", "التحديثات"]) & SUDOERS)
 @language
 async def update_(client, message, _):
     if await is_heroku():
@@ -246,23 +247,21 @@ async def update_(client, message, _):
     for checks in repo.iter_commits(f"HEAD..origin/{config.UPSTREAM_BRANCH}"):
         verification = str(checks.count())
     if verification == "":
-        return await response.edit("» ʙᴏᴛ ɪs ᴜᴘ-ᴛᴏ-ᴅᴀᴛᴇ.")
+        return await response.edit("⦗ عزيزي المطور البوت محدث أحدث إصدار ⦘")
     ordinal = lambda format: "%d%s" % (
         format,
         "tsnrhtdd"[(format // 10 % 10 != 1) * (format % 10 < 4) * format % 10 :: 4],
     )
     updates = "".join(
-        f"<b>➣ #{info.count()}: <a href={REPO_}/commit/{info}>{info.summary}</a> ʙʏ -> {info.author}</b>\n\t\t\t\t<b>➥ ᴄᴏᴍᴍɪᴛᴇᴅ ᴏɴ :</b> {ordinal(int(datetime.fromtimestamp(info.committed_date).strftime('%d')))} {datetime.fromtimestamp(info.committed_date).strftime('%b')}, {datetime.fromtimestamp(info.committed_date).strftime('%Y')}\n\n"
+        f"<b>-› #{info.count()}: <a href={REPO_}/commit/{info}>{info.summary}</a> بواسطة -> {info.author}</b>\n\t\t\t\t<b>-› بتاريخ :</b> {ordinal(int(datetime.fromtimestamp(info.committed_date).strftime('%d')))} {datetime.fromtimestamp(info.committed_date).strftime('%b')}, {datetime.fromtimestamp(info.committed_date).strftime('%Y')}\n\n"
         for info in repo.iter_commits(f"HEAD..origin/{config.UPSTREAM_BRANCH}")
     )
-    _update_response_ = "**ᴀ ɴᴇᴡ ᴜᴩᴅᴀᴛᴇ ɪs ᴀᴠᴀɪʟᴀʙʟᴇ ғᴏʀ ᴛʜᴇ ʙᴏᴛ !**\n\n➣ ᴩᴜsʜɪɴɢ ᴜᴩᴅᴀᴛᴇs ɴᴏᴡ\n\n__**ᴜᴩᴅᴀᴛᴇs:**__\n"
-    _final_updates_ = f"{_update_response_} {updates}"
-
+    _update_response_ = "<b>⦗ عزيزي المطور تم الحصول على تحديثات جديدة  ⦘ </b>\n -› سيتم رفع التحديثات الجديدة على السورس\n\n<b><u>الأضافات :</u></b>\n\n"
+    _final_updates_ = _update_response_ + updates
     if len(_final_updates_) > 4096:
         url = await Yukkibin(updates)
         nrs = await response.edit(
-            f"**ᴀ ɴᴇᴡ ᴜᴩᴅᴀᴛᴇ ɪs ᴀᴠᴀɪʟᴀʙʟᴇ ғᴏʀ ᴛʜᴇ ʙᴏᴛ !**\n\n➣ ᴩᴜsʜɪɴɢ ᴜᴩᴅᴀᴛᴇs ɴᴏᴡ\n\n__**ᴜᴩᴅᴀᴛᴇs :**__\n\n[ᴄʜᴇᴄᴋ ᴜᴩᴅᴀᴛᴇs]({url})",
-            disable_web_page_preview=True,
+            f"<b>⦗ عزيزي المطور تم الحصول على تحديثات جديدة  ⦘ </b>\n -› سيتم رفع التحديثات الجديدة على السورس \n\n<u><b>⦗ التحديثات التي أضافها المطور ⦘ :</b></u>\n\n<a href={url}>تحقق منها .</a>"
         )
     else:
         nrs = await response.edit(_final_updates_, disable_web_page_preview=True)
@@ -274,7 +273,7 @@ async def update_(client, message, _):
             try:
                 await app.send_message(
                     chat_id=int(x),
-                    text="{0} ɪs ᴜᴘᴅᴀᴛᴇᴅ ʜᴇʀsᴇʟғ\n\nʏᴏᴜ ᴄᴀɴ sᴛᴀʀᴛ ᴩʟᴀʏɪɴɢ ᴀɢᴀɪɴ ᴀғᴛᴇʀ 15-20 sᴇᴄᴏɴᴅs.".format(
+                    text="-› تم عمل ريستارت سريع الى {0} .".format(
                         app.mention
                     ),
                 )
@@ -283,9 +282,7 @@ async def update_(client, message, _):
             except:
                 pass
         await response.edit(
-            _final_updates_
-            + f"» ʙᴏᴛ ᴜᴩᴅᴀᴛᴇᴅ sᴜᴄᴄᴇssғᴜʟʟʏ ! ɴᴏᴡ ᴡᴀɪᴛ ғᴏʀ ғᴇᴡ ᴍɪɴᴜᴛᴇs ᴜɴᴛɪʟ ᴛʜᴇ ʙᴏᴛ ʀᴇsᴛᴀʀᴛs",
-            disable_web_page_preview=True,
+            f"{nrs.text}\n\n⦗ سيتم تشغيل البوت بعد دقائق  ⦘"
         )
     except:
         pass
@@ -298,7 +295,7 @@ async def update_(client, message, _):
             return
         except Exception as err:
             await response.edit(
-                f"{nrs.text}\n\nsᴏᴍᴇᴛʜɪɴɢ ᴡᴇɴᴛ ᴡʀᴏɴɢ, ᴩʟᴇᴀsᴇ ᴄʜᴇᴄᴋ ʟᴏɢs."
+                f"{nrs.text}\n\n⦗ هنالك خطا ما، تحقق من السجلات ⦘."
             )
             return await app.send_message(
                 chat_id=config.LOGGER_ID,
@@ -312,20 +309,81 @@ async def update_(client, message, _):
         exit()
 
 
-@app.on_message(filters.command(["restart"]) & SUDOERS)
-async def restart_(_, message):
-    response = await message.reply_text("ʀᴇsᴛᴀʀᴛɪɴɢ...")
-    ac_chats = await get_active_chats()
-    for x in ac_chats:
-        try:
-            await app.send_message(
-                chat_id=int(x),
-                text=f"{app.mention} ɪs ʀᴇsᴛᴀʀᴛɪɴɢ...\n\nʏᴏᴜ ᴄᴀɴ sᴛᴀʀᴛ ᴩʟᴀʏɪɴɢ ᴀɢᴀɪɴ ᴀғᴛᴇʀ 15-20 sᴇᴄᴏɴᴅs.",
-            )
-            await remove_active_chat(x)
-            await remove_active_video_chat(x)
-        except:
-            pass
+@app.on_message(filters.command(["git_pull"]) & SUDOERS)
+@language
+async def updater_(client, message, _):
+    response = await message.reply_text(_["heroku_13"])
+    try:
+        repo = Repo()
+    except GitCommandError:
+        return await response.edit(_["heroku_14"])
+    except InvalidGitRepositoryError:
+        return await response.edit(_["heroku_15"])
+    to_exc = f"git fetch origin {config.UPSTREAM_BRANCH} &> /dev/null"
+    os.system(to_exc)
+    await asyncio.sleep(7)
+    verification = ""
+    REPO_ = repo.remotes.origin.url.split(".git")[0]
+    for checks in repo.iter_commits(f"HEAD..origin/{config.UPSTREAM_BRANCH}"):
+        verification = str(checks.count())
+    if verification == "":
+        return await response.edit("⦗ عزيزي المطور السورس محدث أحدث إصدار ⦘ .")
+    ordinal = lambda format: "%d%s" % (
+        format,
+        "tsnrhtdd"[(format // 10 % 10 != 1) * (format % 10 < 4) * format % 10 :: 4],
+    )
+    updates = "".join(
+        f"<b>-› بواسطة #{info.count()}: <a href={REPO_}/commit/{info}>{info.summary}</a> ʙʏ -> {info.author}</b>\n\t\t\t\t<b>➥ ᴄᴏᴍᴍɪᴛᴇᴅ ᴏɴ :</b> {ordinal(int(datetime.fromtimestamp(info.committed_date).strftime('%d')))} {datetime.fromtimestamp(info.committed_date).strftime('%b')}, {datetime.fromtimestamp(info.committed_date).strftime('%Y')}\n\n"
+        for info in repo.iter_commits(f"HEAD..origin/{config.UPSTREAM_BRANCH}")
+    )
+    _update_response_ = "<b>ᴀ ɴᴇᴡ ᴜᴩᴅᴀᴛᴇ ɪs ᴀᴠᴀɪʟᴀʙʟᴇ ғᴏʀ ᴛʜᴇ ʙᴏᴛ !</b>\n\n➣ ᴩᴜsʜɪɴɢ ᴜᴩᴅᴀᴛᴇs ɴᴏᴡ\n\n<b><u>ᴜᴩᴅᴀᴛᴇs:</u></b>\n\n"
+    _final_updates_ = _update_response_ + updates
+    if len(_final_updates_) > 4096:
+        url = await Yukkibin(updates)
+        nrs = await response.edit(
+            f"<b>ᴀ ɴᴇᴡ ᴜᴩᴅᴀᴛᴇ ɪs ᴀᴠᴀɪʟᴀʙʟᴇ ғᴏʀ ᴛʜᴇ ʙᴏᴛ !</b>\n\n➣ ᴩᴜsʜɪɴɢ ᴜᴩᴅᴀᴛᴇs ɴᴏᴡ\n\n<u><b>ᴜᴩᴅᴀᴛᴇs :</b></u>\n\n<a href={url}>ᴄʜᴇᴄᴋ ᴜᴩᴅᴀᴛᴇs</a>"
+        )
+    else:
+        nrs = await response.edit(_final_updates_, disable_web_page_preview=True)
+    os.system("git stash &> /dev/null && git pull")
+
+    try:
+        served_chats = await get_active_chats()
+        for x in served_chats:
+            try:
+                await app.send_message(
+                    chat_id=int(x),
+                    text="{0} \n- تم اعادة تشغيل البوت .".format(
+                        app.mention
+                    ),
+                )
+                await remove_active_chat(x)
+                await remove_active_video_chat(x)
+            except:
+                pass
+        await response.edit(
+            f"{nrs.text}\n⦗ سيتم تشغيل البوت بعد دقائق  ⦘"
+        )
+    except:
+        pass
+    os.system("pip3 install --no-cache-dir -U -r requirements.txt")
+    os.system(f"kill -9 {os.getpid()} && python3 -m YukkiMusic")
+    exit()
+
+import asyncio
+import os
+import shutil
+from config import LOG_GROUP_ID
+from pyrogram import filters  
+
+async def restart_app():
+    try:
+        await app.send_message(
+            chat_id=LOG_GROUP_ID,
+            text=f"{app.mention} \n- تم اعادة التشغيل بنجاح .",
+        )
+    except:
+        pass
 
     try:
         shutil.rmtree("downloads")
@@ -333,7 +391,17 @@ async def restart_(_, message):
         shutil.rmtree("cache")
     except:
         pass
+
+    os.system(f"kill -9 {os.getpid()} && python3 -m YukkiMusic")  
+
+@app.on_message(filters.text & filters.regex(r"انتظر لمدة 1 دقيقة وبعدها شغل الي يعجبك ."))
+async def check_message(_, message):
+    await restart_app()
+
+@app.on_message(command(["اعادة تشغيل", "⦗ اعادة تشغيل ⦘"]) & SUDOERS)
+async def manual_restart(_, message):
+    response = await message.reply_text("⦗ جاري اعادة التشغيل ⦘")
+    await restart_app()
     await response.edit_text(
-        "» ʀᴇsᴛᴀʀᴛ ᴘʀᴏᴄᴇss sᴛᴀʀᴛᴇᴅ, ᴘʟᴇᴀsᴇ ᴡᴀɪᴛ ғᴏʀ ғᴇᴡ sᴇᴄᴏɴᴅs ᴜɴᴛɪʟ ᴛʜᴇ ʙᴏᴛ sᴛᴀʀᴛs..."
+        "⦗ اعادة التشغيل جاريٍ انتضر قليلاً ... ⦘"
     )
-    os.system(f"kill -9 {os.getpid()} && python3 -m YukkiMusic")
