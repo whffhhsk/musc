@@ -4,6 +4,7 @@ asyncio==3.4.3
 beautifulsoup4
 dnspython
 ffmpeg-python
+telethon
 gitpython
 hachoir
 heroku3
