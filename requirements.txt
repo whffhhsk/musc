@@ -3,9 +3,7 @@ aiohttp==3.9.3
 asyncio==3.4.3
 beautifulsoup4
 dnspython
-telethn
 ffmpeg-python
-telethon
 gitpython
 hachoir
 heroku3
