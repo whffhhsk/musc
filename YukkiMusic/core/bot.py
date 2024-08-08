@@ -19,7 +19,7 @@ from ..logging import LOGGER
 
 class YukkiBot(Client):
     def __init__(self):
-        LOGGER(__name__).info(f"Starting Bot")
+        LOGGER(__name__).info(f"- انتضر قليلاً ...")
         super().__init__(
             "YukkiMusic",
             api_id=config.API_ID,
@@ -38,13 +38,12 @@ class YukkiBot(Client):
         try:
             await self.send_message(
                 config.LOG_GROUP_ID,
-                text=f"<u><b>{self.mention} ʙᴏᴛ sᴛᴀʀᴛᴇᴅ :</b><u>\n\nɪᴅ : <code>{self.id}</code>\nɴᴀᴍᴇ : {self.name}\nᴜsᴇʀɴᴀᴍᴇ : @{self.username}",
+                text=f"<u><b>{self.mention}\n - تم بدء تشغيل البوت :</b><u>\n- ايدي البوت : <code>{self.id}</code>\n- الأسم : {self.name}\n- يوزر البوت : @{self.username}",
             )
         except:
             LOGGER(__name__).error(
-                "Bot has failed to access the log Group. Make sure that you have added your bot to your log channel and promoted as admin!"
+                "- ارفع حساب المساعد مشرف وافتح اتصال ."
             )
-            # sys.exit()
         if config.SET_CMDS == str(True):
             try:
                 await self.set_bot_commands(
@@ -75,7 +74,7 @@ class YukkiBot(Client):
         try:
             a = await self.get_chat_member(config.LOG_GROUP_ID, self.id)
             if a.status != ChatMemberStatus.ADMINISTRATOR:
-                LOGGER(__name__).error("Please promote Bot as Admin in Logger Group")
+                LOGGER(__name__).error("- ارفع البوت مشرف .")
                 sys.exit()
         except Exception:
             pass
@@ -83,4 +82,4 @@ class YukkiBot(Client):
             self.name = get_me.first_name + " " + get_me.last_name
         else:
             self.name = get_me.first_name
-        LOGGER(__name__).info(f"MusicBot Started as {self.name}")
+        LOGGER(__name__).info(f"- تم تشغيل {self.name} بنجاح ")
