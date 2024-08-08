@@ -1,13 +1,12 @@
 #
-# Copyright (C) 2024 by TheTeamVivek@Github, < https://github.com/TheTeamVivek >.
+# Copyright (C) 2024-present by TeamYukki@Github, < https://github.com/TeamYukki >.
 #
-# This file is part of < https://github.com/TheTeamVivek/YukkiMusic > project,
-# and is released under the MIT License.
-# Please see < https://github.com/TheTeamVivek/YukkiMusic/blob/master/LICENSE >
+# This file is part of < https://github.com/TeamYukki/YukkiMusicBot > project,
+# and is released under the "GNU v3.0 License Agreement".
+# Please see < https://github.com/TeamYukki/YukkiMusicBot/blob/master/LICENSE >
 #
 # All rights reserved.
 #
-
 import asyncio
 
 from pyrogram import filters
@@ -32,7 +31,7 @@ basic = {}
 
 def get_image(videoid):
     try:
-        url = f"https://img.youtube.com/vi/{videoid}/hqdefault.jpg"
+        url = f"https://img.youtube.com/vi/{videoid}/maxresdefault.jpg"
         return url
     except Exception:
         return config.YOUTUBE_IMG_URL
@@ -93,7 +92,7 @@ async def ping_com(client, message: Message, _):
         else:
             IMAGE = get_image(videoid)
     send = (
-        "**⌛️ᴅᴜʀᴀᴛɪᴏɴ:** ᴜɴᴋɴᴏᴡɴ ᴅᴜʀᴀᴛɪᴏɴ sᴛʀᴇᴀᴍ \n\nᴄʟɪᴄᴋ ᴏɴ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ᴛᴏ ɢᴇᴛ ᴡʜᴏʟᴇ ǫᴜᴇᴜᴇᴅ ʟɪsᴛ."
+        "**⌛️ᴅᴜʀᴀᴛɪᴏɴ:** ᴜɴᴋɴᴏᴡɴ ᴅᴜʀᴀᴛɪᴏɴ sᴛʀᴇᴀᴍ \n\nᴄʟɪᴄᴋ ᴏɴ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ᴛᴏ ɢᴇᴛ ᴡʜᴏʟʀ ǫᴜᴇᴜᴇᴅ ʟɪsᴛ."
         if DUR == "Unknown"
         else "\nᴄʟɪᴄᴋ ᴏɴ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ᴛᴏ ɢᴇᴛ ᴡʜᴏʟʀ ǫᴜᴇᴜᴇᴅ ʟɪsᴛ."
     )
@@ -194,45 +193,12 @@ async def queued_tracks(client, CallbackQuery: CallbackQuery, _):
         if len(msg) < 700:
             await asyncio.sleep(1)
             return await CallbackQuery.edit_message_text(msg, reply_markup=buttons)
-
         if "🏷" in msg:
             msg = msg.replace("🏷", "")
-        if "ᴄᴜʀʀᴇɴᴛ ᴘʟᴀʏɪɴɢ" in msg:
-            msg = msg.replace("ᴄᴜʀʀᴇɴᴛ ᴘʟᴀʏɪɴɢ", "Current Playling")
-        if "ᴛɪᴛʟᴇ" in msg:
-            msg = msg.replace("ᴛɪᴛʟᴇ", "Title")
-        if "ᴅᴜʀᴀᴛɪᴏɴ" in msg:
-            msg = msg.replace("ᴅᴜʀᴀᴛɪᴏɴ", "Duration")
-        if "ʙʏ" in msg:
-            msg = msg.replace("ʙʏ", "By")
-        if "ǫᴜᴇᴜᴇᴅ" in msg:
-            msg = msg.replace("ǫᴜᴇᴜᴇᴅ", "Queued")
-
         link = await Yukkibin(msg)
-        await CallbackQuery.edit_message_text(
-            _["queue_3"].format(link), reply_markup=buttons
-        )
+        med = InputMediaPhoto(media=link, caption=_["queue_3"].format(link))
+        await CallbackQuery.edit_message_media(media=med, reply_markup=buttons)
     else:
-        if len(msg) > 700:
-            if "🏷" in msg:
-                msg = msg.replace("🏷", "")
-            if "ᴄᴜʀʀᴇɴᴛ ᴘʟᴀʏɪɴɢ" in msg:
-                msg = msg.replace("ᴄᴜʀʀᴇɴᴛ ᴘʟᴀʏɪɴɢ", "Current Playling")
-            if "ᴛɪᴛʟᴇ" in msg:
-                msg = msg.replace("ᴛɪᴛʟᴇ", "Title")
-            if "ᴅᴜʀᴀᴛɪᴏɴ" in msg:
-                msg = msg.replace("ᴅᴜʀᴀᴛɪᴏɴ", "Duration")
-            if "ʙʏ" in msg:
-                msg = msg.replace("ʙʏ", "By")
-            if "ǫᴜᴇᴜᴇᴅ" in msg:
-                msg = msg.replace("ǫᴜᴇᴜᴇᴅ", "Queued")
-
-            link = await Yukkibin(msg)
-            await asyncio.sleep(1)
-            return await CallbackQuery.edit_message_text(
-                _["queue_3"].format(link), reply_markup=buttons
-            )
-
         await asyncio.sleep(1)
         return await CallbackQuery.edit_message_text(msg, reply_markup=buttons)
 
