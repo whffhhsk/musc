@@ -73,6 +73,3 @@ async def get_audii(Mohamed, query: CallbackQuery):
     Thu = f"{IdVi}.png"
     os.remove(Thu)
     os.remove(audio_file) 
-
-
-app.run()
