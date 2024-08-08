@@ -71,9 +71,6 @@ async def must_join_channel(app, msg):
         print(f"I m not admin in the MUST_JOIN chat {Muntazer}!")
 
 
-# Command
-PLAY_COMMAND = get_command("PLAY_COMMAND")
-
 @app.on_message(
     command(
         [
