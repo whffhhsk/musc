@@ -74,7 +74,7 @@ async def assis_set(_, message: Message):
     await message.reply_text(DETAILS, disable_web_page_preview=True, protect_content=PK)
 
 
-@app.on_message(command("الحالي") & admin_filter)
+@app.on_message(command("الحالي"))
 async def check_ass(_, message: Message):
     assistant = await get_assistant(message.chat.id)
     DETAILS = f"""-› المساعد الحالي :
