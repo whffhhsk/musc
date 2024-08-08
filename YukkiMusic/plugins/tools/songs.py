@@ -1,104 +1,118 @@
-from pyrogram import Client, filters
-from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
-from youtube_search import YoutubeSearch as B3KKK 
+# MIT License
+#
+# Copyright (c) 2023 AnonymousX1025
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+import os
+
 import requests
 import yt_dlp
-import os
+from pyrogram import filters
+from pyrogram.enums import ChatType
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
+from youtube_search import YoutubeSearch
 from YukkiMusic import app
 
-@app.on_message(filters.command("يوت"))
-async def search(client: Client, m: Message):
-    AssId = m.from_user.id
+
+@app.on_message(filters.command(["song", "vsong", "video", "music"]))
+async def song(_, message: Message):
     try:
-        Msg = m.text.split(None, 1)[1]
-    except IndexError:
-        return await m.reply("يرجى كتابة اسم الأغنية بعد الأمر.")
-        
-    B3 = B3KKK(Msg, max_results=4).to_dict()
-    buttons = []
-    for i in B3:
-        buttons.append([
-            InlineKeyboardButton(i["title"], callback_data=f"{AssId}Down{i['id']}")
-        ])
-    
-    await m.reply(
-        f"-› نتائج بحثك عن {Msg}:",
-        disable_web_page_preview=True,
-        reply_markup=InlineKeyboardMarkup(buttons)
-    )
+        await message.delete()
+    except:
+        pass
+    m = await message.reply_text("🔎")
 
-@app.on_callback_query(filters.regex("Down"))
-async def get_info(client: Client, query: CallbackQuery):
-    AssId = query.data.split("Down")[0]
-    IdVi = query.data.split("Down")[1]
-    if not query.from_user.id == int(AssId):
-        return await query.answer("هذا الأمر لا يخصك ", show_alert=True)
-    
-    await query.message.delete()
-    B3 = B3KKK(f'https://youtu.be/{IdVi}', max_results=1).to_dict()
-    title = B3[0]['title']
-    url = f'https://youtu.be/{IdVi}'
-    
-    await client.send_message(
-        query.message.chat.id,
-        f"[{title}]({url})",
-        disable_web_page_preview=True,
-        reply_markup=InlineKeyboardMarkup([
-            [InlineKeyboardButton("صوت", callback_data=f'{AssId}MuAu{IdVi}')],
-            [InlineKeyboardButton("🧚‍♀", user_id=5565674333)],
-        ])
-    )
+    query = "".join(" " + str(i) for i in message.command[1:])
+    ydl_opts = {"format": "bestaudio[ext=m4a]"}
+    try:
+        results = YoutubeSearch(query, max_results=5).to_dict()
+        link = f"https://youtube.com{results[0]['url_suffix']}"
+        title = results[0]["title"][:40]
+        thumbnail = results[0]["thumbnails"][0]
+        thumb_name = f"thumb{title}.jpg"
+        thumb = requests.get(thumbnail, allow_redirects=True)
+        open(thumb_name, "wb").write(thumb.content)
+        duration = results[0]["duration"]
 
-@app.on_callback_query(filters.regex("MuAu"))
-async def get_audio(client: Client, query: CallbackQuery):
-    IdVi = query.data.split("MuAu")[1]
-    AssId = query.data.split("MuAu")[0]
-  
-    if not query.from_user.id == int(AssId):
-        return await query.answer("هذا الأمر لا يخصك ", show_alert=True)
-      
-    url = f'https://youtu.be/{IdVi}'
-    await query.edit_message_text(
-        "⏳ جاري التحميل ..", 
-        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⏳", callback_data='none')]])
-    )
-      
-    ydl_ops = {"format": "bestaudio[ext=m4a]"}
-    with yt_dlp.YoutubeDL(ydl_ops) as ydl:
-        info_dict = ydl.extract_info(url, download=False)
-        
-    if int(info_dict['duration']) > 3605:
-        return await query.edit_message_text(
-            "حد التحميل ساعة فقط",
-            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⚠️", callback_data='none')]])
+    except Exception as ex:
+        LOGGER.error(ex)
+        return await m.edit_text(
+            f"ғᴀɪʟᴇᴅ ᴛᴏ ғᴇᴛᴄʜ ᴛʀᴀᴄᴋ ғʀᴏᴍ ʏᴛ-ᴅʟ.\n\n**ʀᴇᴀsᴏɴ :** `{ex}`"
         )
-      
-    audio_file = ydl.prepare_filename(info_dict)
-    ydl.process_info(info_dict)
-    await query.edit_message_text(
-        "جاري الإرسال ..",
-        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🚀", callback_data='none')]])
-    )
-    
-    response = requests.get(info_dict['thumbnail'])
-    with open(f"{IdVi}.png", "wb") as file:
-        file.write(response.content)
-      
-    user = await client.get_users(int(AssId))
-    await query.message.reply_audio(
-        audio_file,
-        title=info_dict['title'],
-        duration=int(info_dict['duration']),
-        performer=info_dict['channel'],
-        caption=f'• من طلب -› {user.mention}',
-        thumb=f"{IdVi}.png"
-    )
-      
-    await query.edit_message_text(
-        f"🔗 [{info_dict['title']}]({url})",
-        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Owner", user_id=5565674333)]]),
-        disable_web_page_preview=True
-    )
-    
-    os.remove(f"{IdVi}.png")
-    os.remove(audio_file)
+
+    await m.edit_text("» ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ sᴏɴɢ,\n\nᴘʟᴇᴀsᴇ ᴡᴀɪᴛ...")
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info_dict = ydl.extract_info(link, download=False)
+            audio_file = ydl.prepare_filename(info_dict)
+            ydl.process_info(info_dict)
+        rep = f"☁️ **ᴛɪᴛʟᴇ :** [{title[:23]}]({link})\n⏱️ **ᴅᴜʀᴀᴛɪᴏɴ :** `{duration}`\n🥀 **ᴜᴘʟᴏᴀᴅᴇᴅ ʙʏ :** {BOT_MENTION}"
+        secmul, dur, dur_arr = 1, 0, duration.split(":")
+        for i in range(len(dur_arr) - 1, -1, -1):
+            dur += int(dur_arr[i]) * secmul
+            secmul *= 60
+        try:
+            visit_butt = InlineKeyboardMarkup(
+                [
+                    [
+                        InlineKeyboardButton(
+                            text="ʏᴏᴜᴛᴜʙᴇ",
+                            url=link,
+                        )
+                    ]
+                ]
+            )
+            await app.send_audio(
+                chat_id=message.from_user.id,
+                audio=audio_file,
+                caption=rep,
+                thumb=thumb_name,
+                title=title,
+                duration=dur,
+                reply_markup=visit_butt,
+            )
+            if message.chat.type != ChatType.PRIVATE:
+                await message.reply_text(
+                    "ᴘʟᴇᴀsᴇ ᴄʜᴇᴄᴋ ʏᴏᴜʀ ᴘᴍ, sᴇɴᴛ ᴛʜᴇ ʀᴇǫᴜᴇsᴛᴇᴅ sᴏɴɢ ᴛʜᴇʀᴇ."
+                )
+        except:
+            start_butt = InlineKeyboardMarkup(
+                [
+                    [
+                        InlineKeyboardButton(
+                            text="ᴄʟɪᴄᴋ ʜᴇʀᴇ",
+                            url=f"https://t.me/{BOT_USERNAME}?start",
+                        )
+                    ]
+                ]
+            )
+            return await m.edit_text(
+                text="ᴄʟɪᴄᴋ ᴏɴ ᴛʜᴇ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ᴀɴᴅ sᴛᴀʀᴛ ᴍᴇ ғᴏʀ ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ sᴏɴɢs.",
+                reply_markup=start_butt,
+            )
+        await m.delete()
+    except:
+        return await m.edit_text("ғᴀɪʟᴇᴅ ᴛᴏ ᴜᴘʟᴏᴀᴅ ᴀᴜᴅɪᴏ ᴏɴ ᴛᴇʟᴇɢʀᴀᴍ sᴇʀᴠᴇʀs.")
+
+    try:
+        os.remove(audio_file)
+        os.remove(thumb_name)
+    except Exception as ex:
+        LOGGER.error(ex)
