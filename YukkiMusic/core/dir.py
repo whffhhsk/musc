@@ -21,7 +21,7 @@ def dirr():
 
     if assets_folder not in listdir():
         logging.warning(
-            f"{assets_folder} Folder not Found. Please clone or fork repository again."
+            f"{assets_folder} حدث خطا ."
         )
         sys.exit()
 
@@ -45,7 +45,7 @@ def dirr():
     if TEMP_DB_FOLDER not in listdir():
         mkdir(TEMP_DB_FOLDER)
 
-    logging.info("Directories Updated.")
+    logging.info("تم تحميل ملفات .")
 
 
 if __name__ == "__main__":
