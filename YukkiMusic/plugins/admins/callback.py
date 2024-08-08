@@ -1,9 +1,9 @@
 #
-# Copyright (C) 2024 by TheTeamVivek@Github, < https://github.com/TheTeamVivek >.
+# Copyright (C) 2024-present by TeamYukki@Github, < https://github.com/TeamYukki >.
 #
-# This file is part of < https://github.com/TheTeamVivek/YukkiMusic > project,
-# and is released under the MIT License.
-# Please see < https://github.com/TheTeamVivek/YukkiMusic/blob/master/LICENSE >
+# This file is part of < https://github.com/TeamYukki/YukkiMusicBot > project,
+# and is released under the "GNU v3.0 License Agreement".
+# Please see < https://github.com/TeamYukki/YukkiMusicBot/blob/master/LICENSE >
 #
 # All rights reserved.
 #
@@ -20,9 +20,8 @@ from config import (
     TELEGRAM_AUDIO_URL,
     TELEGRAM_VIDEO_URL,
     adminlist,
-    SUPPORT_GROUP,
 )
-from YukkiMusic import YouTube, app, YTB
+from YukkiMusic import YouTube, app
 from YukkiMusic.core.call import Yukki
 from YukkiMusic.misc import SUDOERS, db
 from YukkiMusic.utils.database import (
@@ -135,14 +134,14 @@ async def del_back_playlist(client, CallbackQuery, _):
 
     elif command == "Skip":
         check = db.get(chat_id)
-        txt = f"» ᴛʀᴀᴄᴋ sᴋɪᴩᴩᴇᴅ ʙʏ {mention} !"
+        txt = f"- بواسطة {mention} !"
         popped = None
         try:
             popped = check.pop(0)
             if popped:
                 await auto_clean(popped)
             if not check:
-                await CallbackQuery.edit_message_text(f"» ᴛʀᴀᴄᴋ sᴋɪᴩᴩᴇᴅ ʙʏ {mention} !")
+                await CallbackQuery.edit_message_text(f"- بواسطة {mention} !")
                 await CallbackQuery.message.reply_text(
                     _["admin_10"].format(mention), disable_web_page_preview=True
                 )
@@ -152,7 +151,7 @@ async def del_back_playlist(client, CallbackQuery, _):
                     return
         except:
             try:
-                await CallbackQuery.edit_message_text(f"» ᴛʀᴀᴄᴋ sᴋɪᴩᴩᴇᴅ ʙʏ {mention} !")
+                await CallbackQuery.edit_message_text(f"- بواسطة {mention} !")
                 await CallbackQuery.message.reply_text(
                     _["admin_10"].format(mention), disable_web_page_preview=True
                 )
@@ -178,7 +177,7 @@ async def del_back_playlist(client, CallbackQuery, _):
             try:
                 await Yukki.skip_stream(chat_id, link, video=status)
             except Exception:
-                return await CallbackQuery.message.reply_text(_["call_7"])
+                return await CallbackQuery.message.reply_text(_["call_9"])
             button = telegram_markup(_, chat_id)
             img = await gen_thumb(videoid)
             run = await CallbackQuery.message.reply_photo(
@@ -194,7 +193,7 @@ async def del_back_playlist(client, CallbackQuery, _):
             await CallbackQuery.edit_message_text(txt)
         elif "vid_" in queued:
             mystic = await CallbackQuery.message.reply_text(
-                _["call_8"], disable_web_page_preview=True
+                _["call_10"], disable_web_page_preview=True
             )
             try:
                 file_path, direct = await YouTube.download(
@@ -204,19 +203,11 @@ async def del_back_playlist(client, CallbackQuery, _):
                     video=status,
                 )
             except:
-                try:
-                    file_path, direct = await YTB.download(
-                        videoid,
-                        mystic,
-                        videoid=True,
-                        video=status,
-                    )
-                except:
-                    return await mystic.edit_text(_["call_7"])
+                return await mystic.edit_text(_["call_9"])
             try:
                 await Yukki.skip_stream(chat_id, file_path, video=status)
             except Exception:
-                return await mystic.edit_text(_["call_7"])
+                return await mystic.edit_text(_["call_9"])
             button = stream_markup(_, videoid, chat_id)
             img = await gen_thumb(videoid)
             run = await CallbackQuery.message.reply_photo(
@@ -237,7 +228,7 @@ async def del_back_playlist(client, CallbackQuery, _):
             try:
                 await Yukki.skip_stream(chat_id, videoid, video=status)
             except Exception:
-                return await CallbackQuery.message.reply_text(_["call_7"])
+                return await CallbackQuery.message.reply_text(_["call_9"])
             button = telegram_markup(_, chat_id)
             run = await CallbackQuery.message.reply_photo(
                 photo=STREAM_IMG_URL,
@@ -251,7 +242,7 @@ async def del_back_playlist(client, CallbackQuery, _):
             try:
                 await Yukki.skip_stream(chat_id, queued, video=status)
             except Exception:
-                return await CallbackQuery.message.reply_text(_["call_7"])
+                return await CallbackQuery.message.reply_text(_["call_9"])
             if videoid == "telegram":
                 button = telegram_markup(_, chat_id)
                 run = await CallbackQuery.message.reply_photo(
@@ -260,9 +251,7 @@ async def del_back_playlist(client, CallbackQuery, _):
                         if str(streamtype) == "audio"
                         else TELEGRAM_VIDEO_URL
                     ),
-                    caption=_["stream_1"].format(
-                        title, SUPPORT_GROUP, check[0]["dur"], user
-                    ),
+                    caption=_["stream_3"].format(title, check[0]["dur"], user),
                     reply_markup=InlineKeyboardMarkup(button),
                 )
                 db[chat_id][0]["mystic"] = run
@@ -275,9 +264,7 @@ async def del_back_playlist(client, CallbackQuery, _):
                         if str(streamtype) == "audio"
                         else TELEGRAM_VIDEO_URL
                     ),
-                    caption=_["stream_1"].format(
-                        title, SUPPORT_GROUP, check[0]["dur"], user
-                    ),
+                    caption=_["stream_3"].format(title, check[0]["dur"], user),
                     reply_markup=InlineKeyboardMarkup(button),
                 )
                 db[chat_id][0]["mystic"] = run
@@ -318,7 +305,7 @@ async def del_back_playlist(client, CallbackQuery, _):
             if (duration_played - duration_to_skip) <= 10:
                 bet = seconds_to_min(duration_played)
                 return await CallbackQuery.answer(
-                    f"» ʙᴏᴛ ɪs ᴜɴᴀʙʟᴇ ᴛᴏ sᴇᴇᴋ ʙᴇᴄᴀᴜsᴇ ᴛʜᴇ ᴅᴜʀᴀᴛɪᴏɴ ᴇxᴄᴇᴇᴅs.\n\nᴄᴜʀʀᴇɴᴛʟʏ ᴩʟᴀʏᴇᴅ :** {bet}** ᴍɪɴᴜᴛᴇs ᴏᴜᴛ ᴏғ **{duration}** ᴍɪɴᴜᴛᴇs.",
+                    f"- البوت غير قادر على التخطي لأن المدة تتجاوز .\n\nالمدة الحالية :** {bet}** دقائق من **{duration}** دقائق .",
                     show_alert=True,
                 )
             to_seek = duration_played - duration_to_skip + 1
@@ -326,7 +313,7 @@ async def del_back_playlist(client, CallbackQuery, _):
             if (duration_seconds - (duration_played + duration_to_skip)) <= 10:
                 bet = seconds_to_min(duration_played)
                 return await CallbackQuery.answer(
-                    f"» ʙᴏᴛ ɪs ᴜɴᴀʙʟᴇ ᴛᴏ sᴇᴇᴋ ʙᴇᴄᴀᴜsᴇ ᴛʜᴇ ᴅᴜʀᴀᴛɪᴏɴ ᴇxᴄᴇᴇᴅs.\n\nᴄᴜʀʀᴇɴᴛʟʏ ᴩʟᴀʏᴇᴅ :** {bet}** ᴍɪɴᴜᴛᴇs ᴏᴜᴛ ᴏғ **{duration}** ᴍɪɴᴜᴛᴇs.",
+                    f"- البوت غير قادر على التخطي لأن المدة تتجاوز .\n\nالمدة الحالية :** {bet}** دقائق من **{duration}** دقائق .",
                     show_alert=True,
                 )
             to_seek = duration_played + duration_to_skip + 1
@@ -351,25 +338,30 @@ async def del_back_playlist(client, CallbackQuery, _):
         else:
             db[chat_id][0]["played"] += duration_to_skip
         string = _["admin_33"].format(seconds_to_min(to_seek))
-        await mystic.edit_text(f"{string}\n\nᴄʜᴀɴɢᴇs ᴅᴏɴᴇ ʙʏ : {mention} !")
+        await mystic.edit_text(f"{string}\n\n- بواسطة : {mention} !")
 
 
 __MODULE__ = "Adᴍɪɴ"
-__HELP__ = """
+__HELP__ = """✅<u>Aᴅᴍɪɴ Cᴏᴍᴍᴀɴᴅs:</u>
 
-<b>c sᴛᴀɴᴅs ғᴏʀ ᴄʜᴀɴɴᴇʟ ᴘʟᴀʏ.</b>
+c sᴛᴀɴᴅs ғᴏʀ ᴄʜᴀɴɴᴇʟ ᴘʟᴀʏ.
 
-<b>✧ /pause</b> ᴏʀ <b>/cpause</b> - Pᴀᴜsᴇ ᴛʜᴇ ᴘʟᴀʏɪɴɢ ᴍᴜsɪᴄ.
-<b>✧ /resume</b> ᴏʀ <b>/cresume</b> - Rᴇsᴜᴍᴇ ᴛʜᴇ ᴘᴀᴜsᴇᴅ ᴍᴜsɪᴄ.
-<b>✧ /mute</b> ᴏʀ <b>/cmute</b> - Mᴜᴛᴇ ᴛʜᴇ ᴘʟᴀʏɪɴɢ ᴍᴜsɪᴄ.
-<b>✧ /unmute</b> ᴏʀ <b>/cunmute</b> - Uɴᴍᴜᴛᴇ ᴛʜᴇ ᴍᴜᴛᴇᴅ ᴍᴜsɪᴄ.
-<b>✧ /skip</b> ᴏʀ <b>/cskip</b> - Sᴋɪᴘ ᴛʜᴇ ᴄᴜʀʀᴇɴᴛ ᴘʟᴀʏɪɴɢ ᴍᴜsɪᴄ.
-<b>✧ /stop</b> ᴏʀ <b>/cstop</b> - Sᴛᴏᴘ ᴛʜᴇ ᴘʟᴀʏɪɴɢ ᴍᴜsɪᴄ.
-<b>✧ /shuffle</b> ᴏʀ <b>/cshuffle</b> - Rᴀɴᴅᴏᴍʟʏ sʜᴜғғʟᴇs ᴛʜᴇ ǫᴜᴇᴜᴇᴅ ᴘʟᴀʏʟɪsᴛ.
-<b>✧ /seek</b> ᴏʀ <b>/cseek</b> - Fᴏʀᴡᴀʀᴅ Sᴇᴇᴋ ᴛʜᴇ ᴍᴜsɪᴄ ᴛᴏ ʏᴏᴜʀ ᴅᴜʀᴀᴛɪᴏɴ.
-<b>✧ /seekback</b> ᴏʀ <b>/cseekback</b> - Bᴀᴄᴋᴡᴀʀᴅ Sᴇᴇᴋ ᴛʜᴇ ᴍᴜsɪᴄ ᴛᴏ ʏᴏᴜʀ ᴅᴜʀᴀᴛɪᴏɴ.
-<b>✧ /reboot</b> - Rᴇʙᴏᴏᴛ ʙᴏᴛ ғᴏʀ ʏᴏᴜʀ ᴄʜᴀᴛ.
+/pause ᴏʀ /cpause - Pᴀᴜsᴇ ᴛʜᴇ ᴘʟᴀʏɪɴɢ ᴍᴜsɪᴄ.
+/resume ᴏʀ /cresume - Rᴇsᴜᴍᴇ ᴛʜᴇ ᴘᴀᴜsᴇᴅ ᴍᴜsɪᴄ.
+/mute ᴏʀ /cmute - Mᴜᴛᴇ ᴛʜᴇ ᴘʟᴀʏɪɴɢ ᴍᴜsɪᴄ.
+/unmute ᴏʀ /cunmute - Uɴᴍᴜᴛᴇ ᴛʜᴇ ᴍᴜᴛᴇᴅ ᴍᴜsɪᴄ.
+/skip ᴏʀ /cskip - - Sᴋɪᴘ ᴛʜᴇ ᴄᴜʀʀᴇɴᴛ ᴘʟᴀʏɪɴɢ ᴍᴜsɪᴄ.
+/stop ᴏʀ /cstop - Sᴛᴏᴘ ᴛʜᴇ ᴘʟᴀʏɪɴɢ ᴍᴜsɪᴄ.
+/shuffle ᴏʀ /cshuffle - Rᴀɴᴅᴏᴍʟʏ sʜᴜғғʟᴇs ᴛʜᴇ ǫᴜᴇᴜᴇᴅ ᴘʟᴀʏʟɪsᴛ.
+/seek  ᴏʀ /cseek - Fᴏʀᴡᴀʀᴅ Sᴇᴇᴋ ᴛʜᴇ ᴍᴜsɪᴄ ᴛᴏ ʏᴏᴜʀ ᴅᴜʀᴀᴛɪᴏɴ
+/seekback ᴏʀ /cseekback - Bᴀᴄᴋᴡᴀʀᴅ Sᴇᴇᴋ ᴛʜᴇ ᴍᴜsɪᴄ ᴛᴏ ʏᴏᴜʀ ᴅᴜʀᴀᴛɪᴏɴ
+/reboot - Rᴇʙᴏᴏᴛ ʙᴏᴛ ғᴏʀ ʏᴏᴜʀ ᴄʜᴀᴛ .
 
-<b>✧ /skip</b> ᴏʀ <b>/cskip</b> [Nᴜᴍʙᴇʀ (ᴇxᴀᴍᴘʟᴇ: 𝟹)] - Sᴋɪᴘs ᴍᴜsɪᴄ ᴛᴏ ᴀ ᴛʜᴇ sᴘᴇᴄɪғɪᴇᴅ ǫᴜᴇᴜᴇᴅ ɴᴜᴍʙᴇʀ. Exᴀᴍᴘʟᴇ: <b>/skip 𝟹</b> ᴡɪʟʟ sᴋɪᴘ ᴍᴜsɪᴄ ᴛᴏ ᴛʜɪʀᴅ ǫᴜᴇᴜᴇᴅ ᴍᴜsɪᴄ ᴀɴᴅ ᴡɪʟʟ ɪɢɴᴏʀᴇ 𝟷 ᴀɴᴅ 𝟸 ᴍᴜsɪᴄ ɪɴ ǫᴜᴇᴜᴇ.
+✅<u>Sᴘᴇᴄɪғɪᴄ Sᴋɪᴘ:</u>
+/skip ᴏʀ /cskip [Nᴜᴍʙᴇʀ(ᴇxᴀᴍᴘʟᴇ: 𝟹)] 
+    - Sᴋɪᴘs ᴍᴜsɪᴄ ᴛᴏ ᴀ ᴛʜᴇ sᴘᴇᴄɪғɪᴇᴅ ǫᴜᴇᴜᴇᴅ ɴᴜᴍʙᴇʀ. Exᴀᴍᴘʟᴇ: /sᴋɪᴘ 𝟹 ᴡɪʟʟ sᴋɪᴘ ᴍᴜsɪᴄ ᴛᴏ ᴛʜɪʀᴅ ǫᴜᴇᴜᴇᴅ ᴍᴜsɪᴄ ᴀɴᴅ ᴡɪʟʟ ɪɢɴᴏʀᴇ 𝟷 ᴀɴᴅ 𝟸 ᴍᴜsɪᴄ ɪɴ ǫᴜᴇᴜᴇ.
 
-<b>✧ /loop</b> ᴏʀ <b>/cloop</b> [ᴇɴᴀʙʟᴇ/ᴅɪsᴀʙʟᴇ] ᴏʀ [Nᴜᴍʙᴇʀs ʙᴇᴛᴡᴇᴇɴ 𝟷-𝟷𝟶] - Wʜᴇɴ ᴀᴄᴛɪᴠᴀᴛᴇᴅ, ʙᴏᴛ ʟᴏᴏᴘs ᴛʜᴇ ᴄᴜʀʀᴇɴᴛ ᴘʟᴀʏɪɴɢ ᴍᴜsɪᴄ ᴛᴏ 𝟷-𝟷𝟶 ᴛɪᴍᴇs ᴏɴ ᴠᴏɪᴄᴇ ᴄʜᴀᴛ. Dᴇғᴀᴜʟᴛ ᴛᴏ 𝟷𝟶 ᴛɪᴍᴇs."""
+✅<u>Lᴏᴏᴘ Pʟᴀʏ:</u>
+/loop ᴏʀ /cloop [ᴇɴᴀʙʟᴇ/ᴅɪsᴀʙʟᴇ] ᴏʀ [Nᴜᴍʙᴇʀs ʙᴇᴛᴡᴇᴇɴ 𝟷-𝟷𝟶] 
+    - Wʜᴇɴ ᴀᴄᴛɪᴠᴀᴛᴇᴅ, ʙᴏᴛ ʟᴏᴏᴘs ᴛʜᴇ ᴄᴜʀʀᴇɴᴛ ᴘʟᴀʏɪɴɢ ᴍᴜsɪᴄ ᴛᴏ 𝟷-𝟷𝟶 ᴛɪᴍᴇs ᴏɴ ᴠᴏɪᴄᴇ ᴄʜᴀᴛ. Dᴇғᴀᴜʟᴛ ᴛᴏ 𝟷𝟶 ᴛɪᴍᴇs.
+"""
