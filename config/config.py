@@ -10,7 +10,6 @@ import re
 
 API_ID = int(getenv("API_ID", ""))
 API_HASH = getenv("API_HASH")
-SONG_DOWNLOAD_DURATION = int(getenv("SONG_DOWNLOAD_DURATION_LIMIT", "90"))  
 OWNER = int(os.getenv("OWNER", "1854384004"))
 BOT_TOKEN = getenv("BOT_TOKEN")
 Muntazer = getenv("Muntazer", "")
