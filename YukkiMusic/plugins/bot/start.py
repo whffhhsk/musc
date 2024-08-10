@@ -33,8 +33,7 @@ async def start_(client: Client, message: Message):
                     InlineKeyboardButton(text="⦗ اوامر البوت ⦘", callback_data="command_list")
                 ],
                 [
-                    InlineKeyboardButton(text="⦗ قناة السورس ⦘", url=SUPPORT_CHANNEL),
-                    InlineKeyboardButton(text="⦗ قناة التحديثات ⦘", url=SUPPORT_GROUP),
+                    InlineKeyboardButton(text="⦗ 🇹🇷الكوفـي  ⦘", url=SUPPORT_CHANNEL),
                 ],
                 [
                     InlineKeyboardButton(text="⦗ مطور البوت ⦘", user_id=int(OWNER)),
@@ -47,7 +46,7 @@ async def start_(client: Client, message: Message):
 async def start_set(_, query: CallbackQuery):
     await query.answer("قائمة التحكم")
     await query.edit_message_text(
-        f"""أَهلًا بك عزيزي في بوت تشغيل الميديا الصوتية في المجموعات والقنوات مع دعم مُميزات كثيرة يُمكنُك التحقُق منها عن طريق إِستخدام الازرار أدناه . \n⎯ ⎯ ⎯ ⎯""",
+        f"""- اهـلا بـك عـزيـزي في بـوت المـيوزك الخـاص بالـحفـره🇹🇷. \n⎯ ⎯ ⎯ ⎯""",
         reply_markup=InlineKeyboardMarkup(
             [
                 [
