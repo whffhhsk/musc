@@ -26,14 +26,11 @@ async def start_(client: Client, message: Message):
     await add_served_user(user_id)
     await message.reply_photo(
         photo=START_IMG_URL,
-        caption=f"""أَهلًا بك عزيزي في بوت تشغيل الميديا الصوتية في المجموعات والقنوات مع دعم مُميزات كثيرة يُمكنُك التحقُق منها عن طريق إِستخدام الازرار أدناه . \n⎯ ⎯ ⎯ ⎯""",
+        caption=f"""- اهـلا بـك عـزيـزي في بـوت المـيوزك الخـاص بالـحفـره🇹🇷  . \n⎯ ⎯ ⎯ ⎯""",
         reply_markup=InlineKeyboardMarkup(
             [
                 [
                     InlineKeyboardButton(text="⦗ اوامر البوت ⦘", callback_data="command_list")
-                ],
-                [
-                    InlineKeyboardButton(text="⦗ 🇹🇷الكوفـي  ⦘", url=SUPPORT_CHANNEL),
                 ],
                 [
                     InlineKeyboardButton(text="⦗ مطور البوت ⦘", user_id=int(OWNER)),
@@ -41,12 +38,12 @@ async def start_(client: Client, message: Message):
             ]
         )
     )
-
+    
 @app.on_callback_query(filters.regex("home_start"))
 async def start_set(_, query: CallbackQuery):
     await query.answer("قائمة التحكم")
     await query.edit_message_text(
-        f"""- اهـلا بـك عـزيـزي في بـوت المـيوزك الخـاص بالـحفـره🇹🇷. \n⎯ ⎯ ⎯ ⎯""",
+        f"""- اهـلا بـك عـزيـزي في بـوت المـيوزك الخـاص بالـحفـره🇹🇷 """,
         reply_markup=InlineKeyboardMarkup(
             [
                 [
@@ -63,21 +60,15 @@ async def start_set(_, query: CallbackQuery):
         )
     )
 
-# المزيد من الدوال والتصريحات الأخرى للأحداث والاستجابات
-
 @app.on_callback_query(filters.regex("home_start"))
 async def start_set(_, query: CallbackQuery):
     await query.answer("قائمة التحكم")
     await query.edit_message_text(
-        f"""أَهلًا بك عزيزي في بوت تشغيل الميديا الصوتية في المجموعات والقنوات مع دعم مُميزات كثيرة يُمكنُك التحقُق منها عن طريق إِستخدام الازرار أدناه . \n⎯ ⎯ ⎯ ⎯""",
+        f"""- اهـلا بـك عـزيـزي في بـوت المـيوزك الخـاص بالـحفـره🇹🇷 """,
         reply_markup=InlineKeyboardMarkup(
             [
                 [
                     InlineKeyboardButton(text="⦗ اوامر البوت ⦘", callback_data="command_list")
-                ],
-                [
-                    InlineKeyboardButton(text="⦗ قناة السورس ⦘", url=SUPPORT_CHANNEL),
-                    InlineKeyboardButton(text="⦗ قناة التحديثات ⦘", url=SUPPORT_GROUP),
                 ],
                 [
                     InlineKeyboardButton(text="⦗ مطور البوت ⦘", user_id=int(OWNER)),
