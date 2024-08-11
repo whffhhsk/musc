@@ -26,14 +26,14 @@ async def start_(client: Client, message: Message):
     await add_served_user(user_id)
     await message.reply_photo(
         photo=START_IMG_URL,
-        caption=f"""- اهـلا بـك عـزيـزي في بـوت المـيوزك الخـاص بالـحفـره🇹🇷  . \n⎯ ⎯ ⎯ ⎯""",
+        caption=f"""- اهـلا بـك عـزيـزي في بـوت المـيوزك الخـاص بالـحفـره🇹🇷  """,
         reply_markup=InlineKeyboardMarkup(
             [
                 [
-                    InlineKeyboardButton(text="⦗ اوامر البوت ⦘", callback_data="command_list")
+                    InlineKeyboardButton(text=" الاوامر ", callback_data="command_list")
                 ],
                 [
-                    InlineKeyboardButton(text="⦗ مطور البوت ⦘", user_id=int(OWNER)),
+                    InlineKeyboardButton(text=" المطور  ", user_id=int(OWNER)),
                 ],
             ]
         )
